@@ -25,7 +25,11 @@ class VAD:
         for batch in self.state_generator(self.model, [self.fname], audios_in_stream=1):
             if batch:
                 counter += 1
-                self.time.append(*batch[0][0].keys())
+                value = list(batch[0][0].keys())
+                if len(value) == 2:
+                    self.time.append(value[0])
+                else:
+                    self.time.append(value[0])
 
             if batch and not counter % 2:
                 self._write_file()
