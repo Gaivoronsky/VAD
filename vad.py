@@ -58,7 +58,6 @@ class VAD:
             self.detected_pause -= 1
 
         if self.rec and self.stop_iter < 0 and self.detected_pause < 0:
-            self.audio_frames.append(self.data)
             if len(self.audio_frames) > 4:
                 self._write_file()
                 self.audio_frames = []
