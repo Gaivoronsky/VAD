@@ -5,7 +5,7 @@ import os
 
 
 class VAD:
-    def __init__(self, fname, save_dir, mode: int = 0):
+    def __init__(self, fname, save_dir=None, mode: int = 0):
         self.save_dir = save_dir
         self.fname = fname
         self.mode = mode
@@ -31,6 +31,7 @@ class VAD:
         self.num_slice = len(self.wav) // self.size
 
         self.audio_frames = []
+        self.speech_timestamps = []
         self.rec = False
         self.iter_file = 0
         self.sample = 0
@@ -59,14 +60,20 @@ class VAD:
 
         if self.rec and self.stop_iter < 0 and self.detected_pause < 0:
             if len(self.audio_frames) > 4:
-                self._write_file()
+                self.end = self.counter * self.size
+                self.speech_timestamps.append({'start': self.start, 'end': self.end})
+                if self.save_dir:
+                    self._write_file()
                 self.audio_frames = []
                 self.iter_file += 1
                 self.rec = False
                 self.sample = 0
 
         if self.value == 0 and self.rec:
-            self._write_file()
+            self.end = self.counter * self.size
+            self.speech_timestamps.append({'start': self.start, 'end': self.end})
+            if self.save_dir:
+                self._write_file()
 
     def scanning(self):
         self._value_analysis()
@@ -81,15 +88,9 @@ class VAD:
         else:
             self.value = 0
             self._detected()
+        return self.speech_timestamps
 
     def _write_file(self):
-        lenght = len(self.audio_frames)
-        lenght_time = lenght * self.size / self.rate
-        time_end = (self.counter * self.size) / self.rate
-        time_start = time_end - lenght_time
-
-        time_fragment_start = int(time_start)
-        time_fragment_end = int(time_end)
         fname = f'{self.conter_trec}.wav'
         sf.write(os.path.join(self.save_dir, fname), list(chain(*self.audio_frames)), self.rate)
         self.conter_trec += 1

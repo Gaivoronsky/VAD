@@ -10,21 +10,23 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--vad", help="mode operating VAD", type=int, default=1, choices=[0, 1, 2, 3])
     parser.add_argument("--file", help="path audio file")
-    parser.add_argument("--save_dir", help="dir save split audio file", default='data')
+    parser.add_argument("--save_dir", help="dir save split audio file")
     return parser
 
 
 def main(args):
-    if not os.path.exists(args.save_dir): os.mkdir(args.save_dir)
+    if args.save_dir:
+        if not os.path.exists(args.save_dir): os.mkdir(args.save_dir)
     if args.vad == 3:
         from exp_vad import VAD
         VadAudio = VAD(args.file, args.save_dir)
-        VadAudio.scanning()
+        timeline = VadAudio.scanning()
 
     else:
         from vad import VAD
         VadAudio = VAD(args.file, args.save_dir, mode=args.vad)
-        VadAudio.scanning()
+        timeline = VadAudio.scanning()
+    print(timeline)
 
 
 if __name__ == '__main__':
